@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<title>🚗 Car Assistant System</title>
+<style>
+  /* Reset and base styles */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  html, body {
+    height: 100vh;
+    width: 100vw;
+    background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  /* Animated background particles */
+  .bg-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  .particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: rgba(116, 185, 255, 0.6);
+    border-radius: 50%;
+    animation: float 6s infinite linear;
+  }
+
+  @keyframes float {
+    0% {
+      transform: translateY(100vh) rotate(0deg);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-10vh) rotate(360deg);
+      opacity: 0;
+    }
+  }
+
+  /* Main container */
+  .container {
+    position: relative;
+    z-index: 10;
+    width: 100vw;
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    padding: 8px;
+    gap: 8px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 8px 0;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .header h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #74b9ff;
+    text-shadow: 0 0 20px rgba(116, 185, 255, 0.5);
+    letter-spacing: 2px;
+    animation: titleGlow 3s ease-in-out infinite alternate;
+  }
+
+  @keyframes titleGlow {
+    from {
+      text-shadow: 0 0 20px rgba(116, 185, 255, 0.5);
+    }
+    to {
+      text-shadow: 0 0 30px rgba(116, 185, 255, 0.8), 0 0 40px rgba(116, 185, 255, 0.3);
+    }
+  }
+
+  /* Main content area */
+  .main-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 10px;
+    min-height: 0;
+    flex: 1;
+  }
+
+  /* Car visualization area */
+  .car-area {
+    position: relative;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 4px 20px rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  /* Radar sweep animation */
+  .radar-sweep {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 300px;
+    height: 300px;
+    transform: translate(-50%, -50%);
+    border: 2px solid rgba(116, 185, 255, 0.2);
+    border-radius: 50%;
+    animation: radarSweep 4s linear infinite;
+  }
+
+  @keyframes radarSweep {
+    0% {
+      transform: translate(-50%, -50%) rotate(0deg);
+      box-shadow: 0 0 0 0 rgba(116, 185, 255, 0.7);
+    }
+    25% {
+      box-shadow: 0 0 0 10px rgba(116, 185, 255, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 0 20px rgba(116, 185, 255, 0.1);
+    }
+    100% {
+      transform: translate(-50%, -50%) rotate(360deg);
+      box-shadow: 0 0 0 0 rgba(116, 185, 255, 0);
+    }
+  }
+
+  /* Car representation */
+  .car {
+    width: 140px;
+    height: 220px;
+    background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+    border-radius: 20px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+    position: relative;
+    z-index: 10;
+    animation: carPulse 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes carPulse {
+    from {
+      transform: scale(1);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+    to {
+      transform: scale(1.02);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+    }
+  }
+
+  .car::before {
+    content: "";
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    height: 25px;
+    background: linear-gradient(135deg, #74b9ff, #0984e3);
+    border-radius: 12px;
+    opacity: 0.4;
+  }
+
+  .car::after {
+    content: "";
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    height: 25px;
+    background: linear-gradient(135deg, #fd79a8, #e84393);
+    border-radius: 12px;
+    opacity: 0.4;
+  }
+
+  /* Sensor zones */
+  .sensor-zone {
+    position: absolute;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #fff;
+    letter-spacing: 1.5px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;
+    user-select: none;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: default;
+    backdrop-filter: blur(5px);
+  }
+
+  .front-zone {
+    top: 6px;
+    left: 20px;
+    right: 20px;
+    height: 55px;
+  }
+
+  .rear-zone {
+    bottom: 6px;
+    left: 20px;
+    right: 20px;
+    height: 55px;
+  }
+
+  .left-zone {
+    top: 70px;
+    bottom: 70px;
+    left: 6px;
+    width: 55px;
+    writing-mode: vertical-lr;
+    text-orientation: mixed;
+  }
+
+  .right-zone {
+    top: 70px;
+    bottom: 70px;
+    right: 6px;
+    width: 55px;
+    writing-mode: vertical-lr;
+    text-orientation: mixed;
+  }
+
+  /* Zone color states with enhanced animations */
+  .green {
+    background: linear-gradient(135deg, #00b894, #00a085);
+    box-shadow: 0 0 30px #00b894, 0 0 60px rgba(0, 184, 148, 0.3);
+    animation: safeGlow 3s ease-in-out infinite alternate;
+  }
+
+  .yellow {
+    background: linear-gradient(135deg, #fdcb6e, #e17055);
+    box-shadow: 0 0 30px #fdcb6e, 0 0 60px rgba(253, 203, 110, 0.4);
+    animation: warningPulse 1.5s ease-in-out infinite alternate;
+  }
+
+  .red {
+    background: linear-gradient(135deg, #e17055, #d63031);
+    box-shadow: 0 0 40px #e17055, 0 0 80px rgba(225, 112, 85, 0.5);
+    animation: dangerFlash 0.8s ease-in-out infinite alternate;
+  }
+
+  .none {
+    background: linear-gradient(135deg, #636e72, #2d3436);
+    box-shadow: 0 0 15px rgba(99, 110, 114, 0.3);
+    opacity: 0.6;
+  }
+
+  @keyframes safeGlow {
+    from {
+      box-shadow: 0 0 25px #00b894, 0 0 50px rgba(0, 184, 148, 0.2);
+      transform: scale(1);
+    }
+    to {
+      box-shadow: 0 0 35px #00b894, 0 0 70px rgba(0, 184, 148, 0.4);
+      transform: scale(1.02);
+    }
+  }
+
+  @keyframes warningPulse {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: 0 0 30px #fdcb6e, 0 0 60px rgba(253, 203, 110, 0.3);
+    }
+    50% {
+      transform: scale(1.08);
+      box-shadow: 0 0 50px #fdcb6e, 0 0 100px rgba(253, 203, 110, 0.6);
+    }
+  }
+
+  @keyframes dangerFlash {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+      box-shadow: 0 0 40px #e17055, 0 0 80px rgba(225, 112, 85, 0.4);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.15) rotate(1deg);
+      box-shadow: 0 0 80px #e17055, 0 0 160px rgba(225, 112, 85, 0.8);
+    }
+  }
+
+  /* Data panel */
+  .data-panel {
+    display: grid;
+    grid-template-rows: repeat(4, 1fr) auto;
+    gap: 8px;
+  }
+
+  .data-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    padding: 12px 8px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: default;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .data-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s;
+  }
+
+  .data-card:hover::before {
+    left: 100%;
+  }
+
+  .data-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+    border-color: rgba(116, 185, 255, 0.3);
+  }
+
+  .data-card h4 {
+    font-weight: 700;
+    color: #74b9ff;
+    font-size: 0.8rem;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .data-value {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    animation: valueGlow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes valueGlow {
+    from {
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    to {
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 20px rgba(116, 185, 255, 0.3);
+    }
+  }
+
+  .data-unit {
+    font-weight: 600;
+    color: #bdc3c7;
+    margin-top: 3px;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+  }
+
+  /* Status bar */
+  .status-bar {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .status {
+    font-weight: 800;
+    font-size: 1rem;
+    user-select: none;
+    letter-spacing: 1px;
+  }
+
+  .safe-status {
+    color: #00b894;
+    animation: safeStatus 2s ease-in-out infinite alternate;
+  }
+
+  .danger-status {
+    color: #e17055;
+    animation: dangerStatus 1s ease-in-out infinite alternate;
+  }
+
+  @keyframes safeStatus {
+    from {
+      text-shadow: 0 0 10px rgba(0, 184, 148, 0.5);
+    }
+    to {
+      text-shadow: 0 0 20px rgba(0, 184, 148, 0.8);
+    }
+  }
+
+  @keyframes dangerStatus {
+    0%, 100% {
+      opacity: 1;
+      text-shadow: 0 0 10px rgba(225, 112, 85, 0.8);
+    }
+    50% {
+      opacity: 0.7;
+      text-shadow: 0 0 30px rgba(225, 112, 85, 1);
+    }
+  }
+
+  .update-time {
+    margin-top: 8px;
+    color: #74b9ff;
+    font-size: 0.7rem;
+    font-family: 'Courier New', monospace;
+    text-align: center;
+    user-select: none;
+  }
+
+  /* Loading animation */
+  .loading {
+    animation: loadingPulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes loadingPulse {
+    0%, 100% {
+      opacity: 0.5;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  /* Responsive design */
+  @media (max-width: 1200px) {
+    .header h1 {
+      font-size: 2rem;
+    }
+    .main-content {
+      grid-template-columns: 1.5fr 1fr;
+    }
+    .data-value {
+      font-size: 2rem;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .container {
+      padding: 10px;
+      gap: 10px;
+    }
+    .main-content {
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+    .data-panel {
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, 1fr) auto;
+      gap: 10px;
+    }
+    .header h1 {
+      font-size: 1.8rem;
+    }
+    .car {
+      width: 140px;
+      height: 220px;
+    }
+  }
+
+  @media (max-height: 600px) {
+    .container {
+      padding: 8px;
+      gap: 8px;
+    }
+    .header {
+      padding: 10px 0;
+    }
+    .header h1 {
+      font-size: 1.6rem;
+    }
+    .data-card {
+      padding: 15px 10px;
+    }
+    .data-value {
+      font-size: 1.8rem;
+    }
+  }
+</style>
+</head>
+<body>
+  <!-- Animated background particles -->
+  <div class="bg-particles"></div>
+
+  <div class="container" role="main" aria-label="Car parking assistant dashboard">
+    <!-- Header -->
+    <div class="header">
+      <h1>🚗 CAR ASSISTANT SYSTEM</h1>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+      <!-- Car visualization area -->
+      <div class="car-area">
+        <div class="radar-sweep"></div>
+        <div id="front" class="sensor-zone front-zone none loading" aria-live="polite" aria-label="Front sensor status">FRONT</div>
+        <div id="rear" class="sensor-zone rear-zone none loading" aria-live="polite" aria-label="Rear sensor status">REAR</div>
+        <div id="left" class="sensor-zone left-zone none loading" aria-live="polite" aria-label="Left sensor status">LEFT</div>
+        <div id="right" class="sensor-zone right-zone none loading" aria-live="polite" aria-label="Right sensor status">RIGHT</div>
+        <div class="car" aria-hidden="true"></div>
+      </div>
+
+      <!-- Data panel -->
+      <div class="data-panel" aria-live="polite" aria-atomic="true">
+        <div class="data-card" id="frontCard" tabindex="0">
+          <h4>🔍 FRONT SENSOR</h4>
+          <div id="frontDist" class="data-value loading">--</div>
+          <div class="data-unit">cm</div>
+        </div>
+        <div class="data-card" id="rearCard" tabindex="0">
+          <h4>🔙 REAR SENSOR</h4>
+          <div id="rearDist" class="data-value loading">--</div>
+          <div class="data-unit">cm</div>
+        </div>
+        <div class="data-card" id="leftCard" tabindex="0">
+          <h4>⬅️ LEFT SENSOR</h4>
+          <div id="leftDist" class="data-value loading">--</div>
+          <div class="data-unit">cm</div>
+        </div>
+        <div class="data-card" id="rightCard" tabindex="0">
+          <h4>➡️ RIGHT SENSOR</h4>
+          <div id="rightDist" class="data-value loading">--</div>
+          <div class="data-unit">cm</div>
+        </div>
+        <div class="status-bar" aria-live="assertive">
+          <div id="systemStatus" class="status safe-status">🔄 CONNECTING TO SYSTEM...</div>
+          <div class="update-time">
+            <p>Last Updated: <span id="lastUpdate">Connecting...</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Create floating particles
+    function createParticles() {
+      const particlesContainer = document.querySelector('.bg-particles');
+      for (let i = 0; i < 30; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 6 + 's';
+        particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+        particlesContainer.appendChild(particle);
+      }
+    }
+
+    // Fetch data from ESP32
+    async function fetchData() {
+      try {
+        const response = await fetch('http://192.168.8.103/status');
+        const data = await response.json();
+
+        const sensors = [
+          {id: 'front', dist: 'frontDist', value: data.front, alert: data.alert.front},
+          {id: 'rear', dist: 'rearDist', value: data.rear, alert: data.alert.rear},
+          {id: 'left', dist: 'leftDist', value: data.left, alert: data.alert.left},
+          {id: 'right', dist: 'rightDist', value: data.right, alert: data.alert.right}
+        ];
+
+        sensors.forEach(sensor => {
+          const zoneEl = document.getElementById(sensor.id);
+          const distEl = document.getElementById(sensor.dist);
+          const distance = (sensor.value >= 0) ? sensor.value.toFixed(1) : '--';
+
+          distEl.textContent = distance;
+          distEl.classList.remove('loading');
+          zoneEl.className = 'sensor-zone ' + sensor.id + '-zone ' + sensor.alert;
+        });
+
+        const hasDanger = Object.values(data.alert).includes('red');
+        const statusEl = document.getElementById('systemStatus');
+
+        if (hasDanger) {
+          statusEl.textContent = '⚠️ DANGER - OBSTACLE DETECTED';
+          statusEl.className = 'status danger-status';
+        } else {
+          statusEl.textContent = '✅ ALL SYSTEMS OPERATIONAL';
+          statusEl.className = 'status safe-status';
+        }
+        
+        document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+
+      } catch (error) {
+        console.error('Connection error:', error);
+        const statusEl = document.getElementById('systemStatus');
+        statusEl.textContent = '❌ CONNECTION ERROR';
+        statusEl.className = 'status danger-status';
+
+        ['front', 'rear', 'left', 'right'].forEach(id => {
+          const zoneEl = document.getElementById(id);
+          const distEl = document.getElementById(id + 'Dist');
+          zoneEl.className = 'sensor-zone ' + id + '-zone none';
+          distEl.textContent = '--';
+          distEl.classList.add('loading');
+        });
+        
+        document.getElementById('lastUpdate').textContent = 'Connection Failed';
+      }
+    }
+
+    // Initialize
+    createParticles();
+    fetchData();
+    setInterval(fetchData, 750);
+
+    // Add keyboard navigation
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'F11') {
+        e.preventDefault();
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else {
+          document.exitFullscreen();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
